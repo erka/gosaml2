@@ -203,7 +203,7 @@ func (sp *SAMLServiceProvider) validateAssertionSignatures(el *etree.Element) er
 	unsignedAssertions := 0
 	validateAssertion := func(ctx etreeutils.NSContext, unverifiedAssertion *etree.Element) error {
 		if unverifiedAssertion.Parent() != el {
-			return fmt.Errorf("found assertion with unexpected parent element: %s", unverifiedAssertion.Parent().Tag)
+			return fmt.Errorf("found assertion with unexpected parent element: %s", unverifiedAssertion.Tag)
 		}
 
 		detached, err := etreeutils.NSDetatch(ctx, unverifiedAssertion) // make a detached copy
