@@ -103,8 +103,9 @@ func signResponse(t *testing.T, resp string, sp *SAMLServiceProvider) string {
 		parent := sig.Parent()
 		parent.RemoveChild(sig)
 	}
-
-	el, err = sp.SigningContext().SignEnveloped(el)
+	ctx, err := sp.SigningContext()
+	require.NoError(t, err)
+	el, err = ctx.SignEnveloped(el)
 	require.NoError(t, err)
 
 	doc0 := etree.NewDocument()
@@ -143,10 +144,12 @@ func TestSAML(t *testing.T) {
 		IdentityProviderIssuer:      "http://www.okta.com/exk5zt0r12Edi4rD20h7",
 		AssertionConsumerServiceURL: "http://localhost:8080/v1/_saml_callback",
 		SignAuthnRequests:           true,
+		SignAuthnRequestsAlgorithm:  dsig.RSASHA256SignatureMethod,
 		AudienceURI:                 "123",
 		IDPCertificateStore:         &certStore,
 		SPKeyStore:                  randomKeyStore,
 		NameIdFormat:                NameIdFormatPersistent,
+
 	}
 
 	authRequestURL, err := sp.BuildAuthURL("/some/link/here")

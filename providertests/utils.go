@@ -149,7 +149,16 @@ func spAtTime(template *saml2.SAMLServiceProvider, atTime time.Time, rawResp str
 		panic(fmt.Errorf("cannot parse Response XML: %v", err))
 	}
 
-	sp := *template // copy most fields template, we only set the clock below
+	sp := &saml2.SAMLServiceProvider{
+		IdentityProviderSSOURL: template.IdentityProviderSSOURL,
+		IdentityProviderIssuer:      template.IdentityProviderIssuer,
+		AssertionConsumerServiceURL:  template.AssertionConsumerServiceURL,
+		AudienceURI:                 template.AudienceURI,
+		IDPCertificateStore:         template.IDPCertificateStore,
+		SPKeyStore:                  template.SPKeyStore,
+		SPSigningKeyStore:           template.SPSigningKeyStore,
+		ValidateEncryptionCert:      template.ValidateEncryptionCert,
+	} // copy most fields template, we only set the clock below
 	if atTime.IsZero() {
 		// Prefer more official Assertion IssueInstant over Response IssueIntant
 		// (Assertion will be signed, either individually or as part of Response)
@@ -162,5 +171,5 @@ func spAtTime(template *saml2.SAMLServiceProvider, atTime time.Time, rawResp str
 		}
 	}
 	sp.Clock = dsig.NewFakeClock(clockwork.NewFakeClockAt(atTime))
-	return &sp
+	return sp
 }
