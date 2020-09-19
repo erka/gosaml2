@@ -1,11 +1,11 @@
 // Copyright 2016 Russell Haering et al.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     https://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,8 +16,8 @@ package types
 import (
 	"bytes"
 	"crypto/aes"
-	"crypto/des"
 	"crypto/cipher"
+	"crypto/des"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha1"
@@ -25,10 +25,8 @@ import (
 	"crypto/sha512"
 	"crypto/tls"
 	"encoding/base64"
-	"encoding/hex"
 	"fmt"
 	"hash"
-	"strings"
 )
 
 //EncryptedKey contains the decryption key data from the saml2 core and xmlenc
@@ -45,7 +43,7 @@ type EncryptionMethod struct {
 	Algorithm    string       `xml:",attr,omitempty"`
     //Digest method is present for algorithms like RSA-OAEP.
     //See https://www.w3.org/TR/xmlenc-core1/.
-    //To convey the digest methods an entity supports, 
+    //To convey the digest methods an entity supports,
     //DigestMethod in extensions element is used.
     //See http://docs.oasis-open.org/security/saml/Post2.0/sstc-saml-metadata-algsupport.html.
 	DigestMethod *DigestMethod `xml:",omitempty"`
@@ -78,26 +76,6 @@ const (
 	MethodSHA512 = "http://www.w3.org/2000/09/xmldsig#sha512"
 )
 
-//SHA-1 is commonly used for certificate fingerprints (openssl -fingerprint and ADFS thumbprint).
-//SHA-1 is sufficient for our purposes here (error message).
-func debugKeyFp(keyBytes []byte) string {
-	if len(keyBytes) < 1 {
-		return ""
-	}
-	hashFunc := sha1.New()
-	hashFunc.Write(keyBytes)
-	sum := strings.ToLower(hex.EncodeToString(hashFunc.Sum(nil)))
-	var ret string
-	for idx := 0; idx+1 < len(sum); idx += 2 {
-		if idx == 0 {
-			ret += sum[idx : idx+2]
-		} else {
-			ret += ":" + sum[idx:idx+2]
-		}
-	}
-	return ret
-}
-
 //DecryptSymmetricKey returns the private key contained in the EncryptedKey document
 func (ek *EncryptedKey) DecryptSymmetricKey(cert *tls.Certificate) (cipher.Block, error) {
 	if len(cert.Certificate) < 1 {
@@ -112,8 +90,7 @@ func (ek *EncryptedKey) DecryptSymmetricKey(cert *tls.Certificate) (cipher.Block
 		if encCert, err := base64.StdEncoding.DecodeString(ek.X509Data); err != nil {
 			return nil, fmt.Errorf("error decoding EncryptedKey certificate: %v", err)
 		} else if !bytes.Equal(cert.Certificate[0], encCert) {
-			return nil, fmt.Errorf("key decryption attempted with mismatched cert, SP cert(%.11s), assertion cert(%.11s)",
-				debugKeyFp(cert.Certificate[0]), debugKeyFp(encCert))
+			return nil, fmt.Errorf("key decryption attempted with mismatched cert")
 		}
 	}
 
