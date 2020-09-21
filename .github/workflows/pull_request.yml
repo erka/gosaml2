@@ -1,12 +1,18 @@
-on: pull_request
-name: on pull request
+name: Tests on pull request
+
+on:
+  pull_request:
+
 jobs:
   pull_request_chk:
     name: pull request checker
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-go@v2
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
         with:
           go-version: '^1.14.6'
       - run: go test ./...

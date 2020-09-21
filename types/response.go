@@ -1,11 +1,11 @@
 // Copyright 2016 Russell Haering et al.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     https://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -98,12 +98,12 @@ type Subject struct {
 }
 
 type AuthnContext struct {
-	XMLName              xml.Name              `xml:urn:oasis:names:tc:SAML:2.0:assertion AuthnContext"`
+	XMLName              xml.Name              `xml:"urn:oasis:names:tc:SAML:2.0:assertion AuthnContext"`
 	AuthnContextClassRef *AuthnContextClassRef `xml:"AuthnContextClassRef"`
 }
 
 type AuthnContextClassRef struct {
-	XMLName xml.Name `xml:urn:oasis:names:tc:SAML:2.0:assertion AuthnContextClassRef"`
+	XMLName xml.Name `xml:"urn:oasis:names:tc:SAML:2.0:assertion AuthnContextClassRef"`
 	Value   string   `xml:",chardata"`
 }
 
@@ -177,7 +177,7 @@ type AuthnStatement struct {
 	XMLName             xml.Name      `xml:"urn:oasis:names:tc:SAML:2.0:assertion AuthnStatement"`
     //Section 4.1.4.2 - https://docs.oasis-open.org/security/saml/v2.0/saml-profiles-2.0-os.pdf
     //If the identity provider supports the Single Logout profile, defined in Section 4.4
-    //, any such authentication statements MUST include a SessionIndex attribute to enable 
+    //, any such authentication statements MUST include a SessionIndex attribute to enable
     //per-session logout requests by the service provider.
     SessionIndex        string        `xml:"SessionIndex,attr,omitempty"`
 	AuthnInstant        *time.Time    `xml:"AuthnInstant,attr,omitempty"`
