@@ -1,11 +1,11 @@
 // Copyright 2016 Russell Haering et al.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     https://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,17 +26,17 @@ import (
 	"time"
 
 	"github.com/jonboulle/clockwork"
-	"github.com/russellhaering/gosaml2"
+	saml2 "github.com/russellhaering/gosaml2"
 	"github.com/russellhaering/gosaml2/types"
-	"github.com/russellhaering/goxmldsig"
+	dsig "github.com/russellhaering/goxmldsig"
 	"github.com/stretchr/testify/require"
 )
 
 func scenarioIndexes(errs map[int]string, warns map[int]scenarioWarnings) (idxs []int) {
-	for idx, _ := range errs {
+	for idx := range errs {
 		idxs = append(idxs, idx)
 	}
-	for idx, _ := range warns {
+	for idx := range warns {
 		idxs = append(idxs, idx)
 	}
 	sort.Ints(idxs)
@@ -149,8 +149,16 @@ func spAtTime(template *saml2.SAMLServiceProvider, atTime time.Time, rawResp str
 		panic(fmt.Errorf("cannot parse Response XML: %v", err))
 	}
 
-	var sp saml2.SAMLServiceProvider
-	sp = *template // copy most fields template, we only set the clock below
+	sp := &saml2.SAMLServiceProvider{
+		IdentityProviderSSOURL: template.IdentityProviderSSOURL,
+		IdentityProviderIssuer:      template.IdentityProviderIssuer,
+		AssertionConsumerServiceURL:  template.AssertionConsumerServiceURL,
+		AudienceURI:                 template.AudienceURI,
+		IDPCertificateStore:         template.IDPCertificateStore,
+		SPKeyStore:                  template.SPKeyStore,
+		SPSigningKeyStore:           template.SPSigningKeyStore,
+		ValidateEncryptionCert:      template.ValidateEncryptionCert,
+	} // copy most fields template, we only set the clock below
 	if atTime.IsZero() {
 		// Prefer more official Assertion IssueInstant over Response IssueIntant
 		// (Assertion will be signed, either individually or as part of Response)
@@ -163,5 +171,5 @@ func spAtTime(template *saml2.SAMLServiceProvider, atTime time.Time, rawResp str
 		}
 	}
 	sp.Clock = dsig.NewFakeClock(clockwork.NewFakeClockAt(atTime))
-	return &sp
+	return sp
 }

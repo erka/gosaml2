@@ -54,7 +54,8 @@ func TestDecode(t *testing.T) {
 	}
 	decoded := make([]byte, len(f))
 
-	base64.StdEncoding.Decode(decoded, f)
+	_, err = base64.StdEncoding.Decode(decoded, f)
+	require.NoError(t, err)
 	response := &types.Response{}
 
 	err = xml.Unmarshal(decoded, response)
@@ -85,7 +86,7 @@ func TestDecode(t *testing.T) {
 
 	expected := &types.Assertion{}
 	err = xml.Unmarshal(f2, expected)
-
+	require.NoError(t, err)
 	require.EqualValues(t, expected, assertion, "decrypted assertion did not match expectation")
 }
 
@@ -102,8 +103,9 @@ func signResponse(t *testing.T, resp string, sp *SAMLServiceProvider) string {
 		parent := sig.Parent()
 		parent.RemoveChild(sig)
 	}
-
-	el, err = sp.SigningContext().SignEnveloped(el)
+	ctx, err := sp.SigningContext()
+	require.NoError(t, err)
+	el, err = ctx.SignEnveloped(el)
 	require.NoError(t, err)
 
 	doc0 := etree.NewDocument()
@@ -128,7 +130,7 @@ func TestSAML(t *testing.T) {
 
 	randomKeyStore := dsig.RandomKeyStoreForTest()
 	_, _cert, err := randomKeyStore.GetKeyPair()
-
+	require.NoError(t, err)
 	cert0, err := x509.ParseCertificate(_cert)
 	require.NoError(t, err)
 	require.NotEmpty(t, cert0)
@@ -142,10 +144,12 @@ func TestSAML(t *testing.T) {
 		IdentityProviderIssuer:      "http://www.okta.com/exk5zt0r12Edi4rD20h7",
 		AssertionConsumerServiceURL: "http://localhost:8080/v1/_saml_callback",
 		SignAuthnRequests:           true,
+		SignAuthnRequestsAlgorithm:  dsig.RSASHA256SignatureMethod,
 		AudienceURI:                 "123",
 		IDPCertificateStore:         &certStore,
 		SPKeyStore:                  randomKeyStore,
 		NameIdFormat:                NameIdFormatPersistent,
+
 	}
 
 	authRequestURL, err := sp.BuildAuthURL("/some/link/here")
@@ -308,7 +312,8 @@ func TestInvalidResponseBadXML(t *testing.T) {
 	compressor, err := flate.NewWriter(compressed, flate.BestCompression)
 	require.NoError(t, err)
 
-	compressor.Write([]byte(">Definitely&Invalid XML"))
+	_, err = compressor.Write([]byte(">Definitely&Invalid XML"))
+	require.NoError(t, err)
 	compressor.Close()
 
 	b64Response := base64.StdEncoding.EncodeToString(compressed.Bytes())
