@@ -13,7 +13,11 @@
 // limitations under the License.
 package saml2
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/russellhaering/gosaml2/types"
+)
 
 //ErrMissingElement is the error type that indicates an element and/or attribute is
 //missing. It provides a structured error that can be more appropriately acted
@@ -46,13 +50,17 @@ func (e ErrMissingElement) Error() string {
 //RetrieveAssertionInfo takes an encoded response and returns the AssertionInfo
 //contained, or an error message if an error has been encountered.
 func (sp *SAMLServiceProvider) RetrieveAssertionInfo(encodedResponse string) (*AssertionInfo, error) {
-	assertionInfo := &AssertionInfo{
-		Values: make(Values),
-	}
 
 	response, err := sp.ValidateEncodedResponse(encodedResponse)
 	if err != nil {
 		return nil, ErrVerification{Cause: err}
+	}
+	return sp.ValidateAssertionInfo(response)
+}
+
+func (sp *SAMLServiceProvider) ValidateAssertionInfo(response *types.Response) (*AssertionInfo, error) {
+	assertionInfo := &AssertionInfo{
+		Values: make(Values),
 	}
 
 	// TODO: Support multiple assertions
