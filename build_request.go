@@ -37,9 +37,7 @@ func (sp *SAMLServiceProvider) BuildAuthnRequest(arId string, includeSig bool) (
 	authnRequest.CreateAttr("xmlns:samlp", "urn:oasis:names:tc:SAML:2.0:protocol")
 	authnRequest.CreateAttr("xmlns:saml", "urn:oasis:names:tc:SAML:2.0:assertion")
 
-
-
-	authnRequest.CreateAttr("ID", arId)
+	authnRequest.CreateAttr("ID", "_"+arId)
 	authnRequest.CreateAttr("Version", "2.0")
 	authnRequest.CreateAttr("ProtocolBinding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST")
 	authnRequest.CreateAttr("AssertionConsumerServiceURL", sp.AssertionConsumerServiceURL)
@@ -86,11 +84,11 @@ func (sp *SAMLServiceProvider) BuildAuthnRequest(arId string, includeSig bool) (
 }
 
 func (sp *SAMLServiceProvider) BuildAuthRequestDocument() (*etree.Document, error) {
-	return sp.BuildAuthnRequest("_"+uuid.NewV4().String(), true)
+	return sp.BuildAuthnRequest(uuid.NewV4().String(), true)
 }
 
 func (sp *SAMLServiceProvider) BuildAuthRequestDocumentNoSig() (*etree.Document, error) {
-	return sp.BuildAuthnRequest("_"+uuid.NewV4().String(), false)
+	return sp.BuildAuthnRequest(uuid.NewV4().String(), false)
 }
 
 // SignAuthnRequest takes a document, builds a signature, creates another document
